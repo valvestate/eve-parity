@@ -6,7 +6,7 @@
    :: true ~> a1' := true;
    :: true ~> a1' := false;
    goal
-   :: G F s1;
+   :: G F (s1 or s4);
  
   module p2 controls a2
    init
@@ -16,7 +16,7 @@
    :: true ~> a2' := true;
    :: true ~> a2' := false;
    goal
-   :: G F s2;
+   :: G F (s2 or s3);
 
   module environment controls s0,s1,s2,s3,s4
    init
@@ -35,4 +35,4 @@
    :: s4 ~> s0' := false, s1' := false, s2' := false, s3' := false, s4' := true;
    
    property
-   :: X G (s1 or s2);
+   :: G F (s1 or s4) and G F (s2 or s3) ;

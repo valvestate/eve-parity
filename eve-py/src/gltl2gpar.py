@@ -753,6 +753,8 @@ def convertG_cgs(modules,DPWs,M):
     # if check_draw_flag():
         # drawGPar(GPar)
 
+    # print(GPar.vs[0])
+
     return GPar
 
 def forpraline(GPar):
@@ -841,7 +843,7 @@ def forpraline(GPar):
         
 def drawGPar(GPar):
     # for v in GPar.vs:
-    #     print v
+    #     print(v)
     layout = GPar.layout('kk')
 #    GPar.es['label']=[word for word in GPar.es["word"]]
 #    GPar.vs['label']=[('q'+str(v.index),v['colour']) for v in GPar.vs]

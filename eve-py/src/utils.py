@@ -38,7 +38,7 @@ def graph_product(GPar,DPW_prop,alphabets,cgsFlag):
     '''add init state for CGS'''
     if cgsFlag:
         L_t = set(alphabets).intersection(GPar.vs[0]['val'])
-        # print GPar.vs[0]
+        # print('>>', GPar.vs[0])
         if L_t == set([]):
             L_t = set([''])
         # print 'L_t', L_t
@@ -293,7 +293,7 @@ def build_streett_prod(GPar_L,w,modules):
     s_Alpha=[]
     max_colour = get_max_colour(GPar_L)
 #    print 'MAX',max_colour
-#     print('#####w######',w,modules)
+#     print('#####w######',w)
     for pl in w:
         Alpha=[]
         for i in range(max_colour):
@@ -324,8 +324,9 @@ This function check Street automaton emptiness
 '''            
 def Streett_emptyness(GPar_L,s_Alpha,modules):    
     S = copy.copy(GPar_L)
-#    for v in S.vs:
-#        print v
+    # print(modules)
+    # for v in S.vs:
+    #     print(v)
 #     print S.get_edgelist()
 #     for e in S.es():
 #         print e
@@ -356,7 +357,7 @@ def Streett_emptyness(GPar_L,s_Alpha,modules):
                 v_to_del=[]
 #                for i,a in enumerate(Alpha):
                 for x,Alpha in enumerate(s_Alpha):
-#                    print 'ALP',x, Alpha
+                    # print('ALP',x, Alpha)
                     c_cap_E=Alpha[i]['E'+str(i)].intersection(set(c))
                     c_cap_C=Alpha[i]['C'+str(i)].intersection(set(c))
                     if c_cap_E and not c_cap_C:
@@ -387,6 +388,16 @@ def Streett_emptyness(GPar_L,s_Alpha,modules):
 #                        for v in S.vs():
 #                            print v
 #                        print S.get_edgelist()
+#                     print('DEL', v_to_del)
+
+                    '''
+                    prevent initial state to be deleted, since if all other states are bad/deleted,
+                    it does not have successors, will be deleted below anyway.
+                    Need to check if this introduces false positive, e.g., "bad" init state with self-loop?
+                    '''
+                    if 0 in v_to_del:
+                        v_to_del = list(filter(lambda x: x != 0, v_to_del))
+
                     S.delete_vertices(list(set(v_to_del)))
                     break
             if del_flag:
@@ -403,6 +414,7 @@ def Streett_emptyness(GPar_L,s_Alpha,modules):
     '''trivial'''
     for v in S.vs:
         if len(v.successors())==0:
+            # print("NO SUCC", v)
             to_del.append(v.index)
             to_del_sigma.append(v.index)
         else:
@@ -419,10 +431,16 @@ def Streett_emptyness(GPar_L,s_Alpha,modules):
             
     '''return strategy profile \vec{sigma}'''
     S_cpy = copy.copy(S)
+
+    # for s in S_cpy.vs:
+    #     print('SCPY', s)
+
     S_cpy.delete_vertices(to_del_sigma)
     
     '''emptiness check'''
     S.delete_vertices(to_del)
+
+
                 
 #    return S.simplify(multiple=True,loops=False)
     return S,S_cpy
@@ -493,17 +511,19 @@ However, such a deviation may be spurious because there exist punishment actions
 that prevent the goal of i from being satisfied. Can we also extract these punishment actions? 
 This is TODO...
 '''
-def synth_lasso(g, s_Alpha, graph_product_for_rgmFlag):
+def synth_lasso(g, s_Alpha, cgsFlag):
 
     '''rectifying vertex label'''
-    if not graph_product_for_rgmFlag:
-        for v in g.vs:
-            v['label'] = v['name']
+    # if not graph_product_for_rgmFlag:
+    #     for v in g.vs:
+    #         v['label'] = v['name']
 
+    # for v in g.vs:
+    #     print('V:', v)
 
     '''check for each SCC in the witness graph/automaton'''
     for i in g.clusters():
-        if subcyc(idxlist2namelist(g, i), s_Alpha, g, graph_product_for_rgmFlag):
+        if subcyc(idxlist2namelist(g, i), s_Alpha, g, cgsFlag):
             break
         # if not graph_product_for_rgmFlag:
         #     # print("EE", idxlist2namelist(g,i))
@@ -515,22 +535,26 @@ def synth_lasso(g, s_Alpha, graph_product_for_rgmFlag):
         #         break
 
 '''this method checks for a good subset of a given SCC'''
-def subcyc(scc,s_Alpha,g,graphprodFlag):
+def subcyc(scc, s_Alpha, g, cgsFlag):
     '''iterate through each subset, starting from the smallest, producing (probably) the smallest lasso'''
     for n in range(1,len(scc) + 1):
         for subset in itertools.combinations((scc), n):
             # print('SUBSET:', subset)
             # if not graphprodFlag:
             subset = g.vs.select(name_in=subset)
+            subset_labels = []
+            for v in subset:
+                # print('>>', v)
+                subset_labels.append(v['label'])
 
             subg = g.subgraph(subset)
 
             '''if the subset is strong connected, then check it whether it is good wrt the Streett condition'''
             if g.subgraph(subset).is_connected() and len(subg.get_edgelist())>0:
-                if check_good(subset,s_Alpha,g,graphprodFlag):
+                if check_good(subset,s_Alpha,g,subset_labels,cgsFlag):
                     return True
 
-def check_good(component,s_Alpha,g,graphprodFlag):
+def check_good(component,s_Alpha,g,subset_labels, cgsFlag):
     max_col = get_max_colour(g)
 
     # print("MAX COL", max_col)
@@ -538,10 +562,10 @@ def check_good(component,s_Alpha,g,graphprodFlag):
     '''for each index of the Streett condition, check if it is good/satisfying'''
     for i in range(max_col):
         for a in s_Alpha:
-            # print("COMP:", component)
+            # print("COMP:", subset_labels)
             # print(a[i])
-            c_cap_E = a[i]['E' + str(i)].intersection(set(component))
-            c_cap_C = a[i]['C' + str(i)].intersection(set(component))
+            c_cap_E = a[i]['E' + str(i)].intersection(set(subset_labels))
+            c_cap_C = a[i]['C' + str(i)].intersection(set(subset_labels))
 
             '''if bad/unsatisfying then return false'''
             if c_cap_E and not c_cap_C:
@@ -550,16 +574,16 @@ def check_good(component,s_Alpha,g,graphprodFlag):
 
     '''if the subset/component is strongly connected, then build the subgraph from it'''
     if g.subgraph(component).is_connected() and len(g.subgraph(component).get_edgelist())>0:
-        build_subgraph(component,g,graphprodFlag)
+        build_subgraph(component,g,subset_labels, cgsFlag)
         return True
     else:
         return False
 
-def build_subgraph(component,g,graphprodFlag):
+def build_subgraph(component,g,subset_labels, cgsFlag):
     # print(component)
-    vertex_set = set(component)
-    # print(vertex_set)
-    subg = g.subgraph(vertex_set)
+    vertex_set = set(subset_labels)
+    # print('VERTEX SET', vertex_set)
+    subg = g.subgraph(component)
     # plot(subg, target="subg.png")
     # build_cycle(subg,vertex_set)
 
@@ -575,9 +599,12 @@ def build_subgraph(component,g,graphprodFlag):
     # for v in cycle_path:
     #     print(g.vs.select(label_eq=v)[0])
 
+    # for v in g.vs:
+    #     print(v)
+
 
     '''if the initial state is not part of the cycle, then we need to find the shortest prefix'''
-    if 0 not in component:
+    if 0 not in subset_labels:
         prefix, pref_edges = find_prefix(g,cycle)
         # print("LASSO:", prefix, cycle_path)
         lasso = prefix[:-1] + cycle_path

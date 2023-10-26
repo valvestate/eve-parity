@@ -139,6 +139,10 @@ def main(argv):
     updateLabM(M)
     print("Kripke states", M.vcount())
     print("Kripke edges", M.ecount())
+    # for v in M.vs:
+    #     print(v)
+    # for e in M.es:
+        # print(M.vs[e.source], " --(", (e['direction']), ")--> ", M.vs[e.target])
     # if draw_flag:
     #     drawM(M)
         
@@ -173,6 +177,7 @@ def main(argv):
             if verbose:
                 print("\n Convert G_{LTL} to G_{PAR}...\n")
             GPar = convertG_cgs(modules,DPWs,M)
+
         GPar_v = GPar.vcount()
         GPar_e = GPar.ecount()
         perfConstruction = time.time()*1000 - start
@@ -219,4 +224,3 @@ def main(argv):
     
 if __name__ == "__main__":
     main(sys.argv[3:])
-    

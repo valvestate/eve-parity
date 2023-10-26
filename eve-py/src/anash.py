@@ -103,9 +103,11 @@ def anash(modules, GPar, draw_flag, cgsFlag, pf, DPW_prop, alphabets):
 
                 '''check street automaton emptiness'''
                 L, L_sigma = Streett_emptyness(GPar_L[frozenset(l)], s_Alpha, modules)
+
                 '''if not empty'''
                 if L.vcount() != 0:
                     DPW_product = graph_product(L_sigma, DPW_prop, alphabets, cgsFlag)
+
                     e_Alpha = build_streett_prod(DPW_product, w + (len(modules),),
                                                  modules + [{1: set(['environment'])}])
                     E, E_sigma = Streett_emptyness(DPW_product, e_Alpha, modules + [{1: set(['environment'])}])
