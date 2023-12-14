@@ -131,11 +131,13 @@ def merge_two_dicts(x, y):
     z.update(y)
     return z
     
-def drawM(M):
+def drawM(M, cgsFlag):
     layout = M.layout("kk")
-#    M.es["label"] = [direction for direction in M.es["direction"]
+
+    if cgsFlag:
+        M.es["label"] = [direction for direction in M.es["direction"]]
     out = plot(M, layout=layout, bbox =(800,800), margin=40, color="white")
-    # out.save('coba.png')
+    out.save('arena.png')
     # Plot.__init__(M)
     # out.save('coba.png')
 

@@ -229,6 +229,25 @@ def printSynthSigmaDetails(GPar):
 
     return True
 
+def printArena(M, cgsFlag):
+    print("\n\n######## Arena Vertex List ########")
+    for v in M.vs():
+        print(v.index, v['label'])
+
+    print("############################################################\n")
+
+    print("\n######## Arena Transition Profile ########")
+
+    if cgsFlag:
+        for e in M.es():
+            print(M.vs[e.source].index, " --(", (e['direction']), ")--> ", M.vs[e.target].index)
+    else:
+        for e in M.es():
+            print(M.vs[e.source].index, " --(", (M.vs[e.target]['label'][1]), ")--> ", M.vs[e.target].index)
+
+    print("############################################################\n")
+
+
 def num2name(w,modules):
     coal=[]
     for i in w:

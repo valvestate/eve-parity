@@ -139,12 +139,16 @@ def main(argv):
     updateLabM(M)
     print("Kripke states", M.vcount())
     print("Kripke edges", M.ecount())
+
     # for v in M.vs:
     #     print(v)
     # for e in M.es:
-        # print(M.vs[e.source], " --(", (e['direction']), ")--> ", M.vs[e.target])
-    # if draw_flag:
-    #     drawM(M)
+    #     print(M.vs[e.source], " --(", (e['direction']), ")--> ", M.vs[e.target])
+
+    '''Draw the game arena and print the details'''
+    if draw_flag:
+        printArena(M, cgsFlag)
+        drawM(M, cgsFlag)
         
     '''Don't need to do LTL2DPW conversion for memoryless case'''
     if q_flag in [1,2,4]:
